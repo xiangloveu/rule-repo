@@ -38,7 +38,7 @@
       推荐格式：
       test方法名_场景描述
       示例：
-      testUploadMasterData_CodeOaIsNull
+      testGetUserById_UserNotFound
       五、注释与说明规范（强制）
       每一个测试方法 必须 包含完整注释，至少包括：
 - 场景说明
@@ -82,7 +82,7 @@
 7. 将测试代码生成在 test 模块中
    九、适用代码路径示例
 - 示例 Path：
-  com.pupu.admin.finance.api.partner.service.rightofuseasset.RightOfUseAssetService
+  com.example.service.user.UserService
   十、AI 行为约束总结（速览）
 - 仅使用 JUnit4
 - 禁止使用 @Before
