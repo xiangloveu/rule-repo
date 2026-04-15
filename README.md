@@ -6,14 +6,43 @@
 
 ```
 rule-repo/
-├── cursor/                      # 规则文件（适用于 Cursor / Codex / Copilot）
-│   ├── .cursorrules             # Cursor 主配置文件
+├── rules/                       # 通用规范文档（工具无关，唯一数据源）
 │   ├── JAVA_CODE_GUIDE.md       # Java 代码规范
 │   ├── GIT_COMMIT_GUIDE.md      # Git 提交规范
 │   ├── JAVA_TEST_GUIDE.md       # Java 测试规范
 │   └── MYSQL_GUIDE.md           # MySQL 数据库规范
+├── cursor/                      # Cursor 专用配置
+│   └── .cursorrules             # Cursor 主配置文件（内联规范）
+├── copilot/                     # GitHub Copilot 专用配置
+│   └── copilot-instructions.md  # 精简版规范（内联，不支持远程引用）
+├── codex/                       # OpenAI Codex CLI 专用配置
+│   └── AGENTS.md                # 引用 rules/ 远程 URL + 工作流指令
+├── claude/                      # Claude Code 专用配置
+│   └── CLAUDE.md                # 引用 rules/ 远程 URL + Claude 特有指令
 └── README.md
 ```
+
+---
+
+## 📖 规则文件说明
+
+### 通用规范文档（rules/）
+
+| 文件 | 说明 | 更新时间 |
+|------|------|----------|
+| `rules/JAVA_CODE_GUIDE.md` | Java 代码规范（命名、接口、分页、异常处理等） | 2026-02-12 ✨ |
+| `rules/GIT_COMMIT_GUIDE.md` | Git 提交规范（格式、分支策略、工作流） | - |
+| `rules/JAVA_TEST_GUIDE.md` | Java 测试规范（单元测试、集成测试） | - |
+| `rules/MYSQL_GUIDE.md` | MySQL 规范（表设计、索引、SQL 优化） | - |
+
+### 工具专用配置
+
+| 文件 | 工具 | 内容策略 |
+|------|------|---------|
+| `cursor/.cursorrules` | Cursor | 内联完整规范，对话式 AI 指令风格 |
+| `copilot/copilot-instructions.md` | GitHub Copilot | 精简内联，适配 VS Code / IDEA |
+| `codex/AGENTS.md` | OpenAI Codex CLI | 远程 URL 引用 + 任务执行工作流 |
+| `claude/CLAUDE.md` | Claude Code | 远程 URL 引用 + 项目结构 + 审查清单 |
 
 ---
 
@@ -53,7 +82,7 @@ ln -s .rules/cursor/.cursorrules .cursorrules
 
 ---
 
-### 二、OpenAI Codex（codex CLI）
+### 二、OpenAI Codex CLI
 
 Codex CLI 通过 `AGENTS.md` 文件加载项目规范，支持在项目根目录或 `~/.codex/` 全局目录放置说明文件。
 
@@ -67,16 +96,16 @@ Codex CLI 通过 `AGENTS.md` 文件加载项目规范，支持在项目根目录
 请严格遵循以下规范文档中的所有要求：
 
 ## Java 代码规范
-https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/cursor/JAVA_CODE_GUIDE.md
+https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/rules/JAVA_CODE_GUIDE.md
 
 ## Git 提交规范
-https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/cursor/GIT_COMMIT_GUIDE.md
+https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/rules/GIT_COMMIT_GUIDE.md
 
 ## MySQL 规范
-https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/cursor/MYSQL_GUIDE.md
+https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/rules/MYSQL_GUIDE.md
 
 ## 测试规范
-https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/cursor/JAVA_TEST_GUIDE.md
+https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/rules/JAVA_TEST_GUIDE.md
 ```
 
 #### 方式二：下载规范到本地并引用
@@ -86,10 +115,10 @@ https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/cursor/JAVA_TEST_
 mkdir -p .codex
 
 # 下载规范文件
-curl -o .codex/JAVA_CODE_GUIDE.md https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/cursor/JAVA_CODE_GUIDE.md
-curl -o .codex/GIT_COMMIT_GUIDE.md https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/cursor/GIT_COMMIT_GUIDE.md
-curl -o .codex/MYSQL_GUIDE.md https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/cursor/MYSQL_GUIDE.md
-curl -o .codex/JAVA_TEST_GUIDE.md https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/cursor/JAVA_TEST_GUIDE.md
+curl -o .codex/JAVA_CODE_GUIDE.md https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/rules/JAVA_CODE_GUIDE.md
+curl -o .codex/GIT_COMMIT_GUIDE.md https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/rules/GIT_COMMIT_GUIDE.md
+curl -o .codex/MYSQL_GUIDE.md https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/rules/MYSQL_GUIDE.md
+curl -o .codex/JAVA_TEST_GUIDE.md https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/rules/JAVA_TEST_GUIDE.md
 ```
 
 然后在 `AGENTS.md` 中本地引用：
@@ -145,7 +174,7 @@ mkdir -p .github
 
 ```bash
 # 下载规范内容到 copilot-instructions.md
-curl -s https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/cursor/JAVA_CODE_GUIDE.md >> .github/copilot-instructions.md
+curl -s https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/rules/JAVA_CODE_GUIDE.md >> .github/copilot-instructions.md
 ```
 
 或手动创建 `.github/copilot-instructions.md`，内容示例：
@@ -233,15 +262,24 @@ indent_size = 2
 
 ---
 
-## 📖 规则文件说明
+### 四、Claude Code
 
-| 文件 | 说明 |
-|------|------|
-| `cursor/.cursorrules` | AI 助手核心配置，涵盖 Java 开发全套规范 |
-| `cursor/JAVA_CODE_GUIDE.md` | Java 代码规范（命名、接口、分页、异常、日志等） |
-| `cursor/GIT_COMMIT_GUIDE.md` | Git 提交规范（格式、分支策略、工作流） |
-| `cursor/JAVA_TEST_GUIDE.md` | Java 测试规范（单元测试、集成测试） |
-| `cursor/MYSQL_GUIDE.md` | MySQL 规范（表设计、索引、SQL 优化） |
+Claude Code 通过项目根目录的 `CLAUDE.md` 文件加载规范。
+
+#### 方式一：直接复制配置文件（推荐）
+
+```bash
+curl -o CLAUDE.md https://raw.githubusercontent.com/haixiangZhang/rule-repo/main/claude/CLAUDE.md
+```
+
+#### 方式二：Git Submodule
+
+```bash
+git submodule add https://github.com/haixiangZhang/rule-repo.git .rules
+ln -s .rules/claude/CLAUDE.md CLAUDE.md
+```
+
+> **提示**：`CLAUDE.md` 放在项目根目录会被 Claude Code 自动识别加载。
 
 ---
 
@@ -257,6 +295,30 @@ indent_size = 2
 
 ---
 
+## 📊 规范亮点
+
+### 接口层面规范
+从实际项目 `open-basic` 模块提取的最佳实践：
+- 完整的 Controller 注解配置
+- RESTful URL 设计规范（下划线命名）
+- 参数验证和业务校验结合
+- 字段权限控制和数据加密
+
+### 分页规范
+明确的分页场景使用规则：
+- 人员查询：最大 1000 条
+- 组织/岗位查询：最大 2000 条
+- 批量 GET 接口：最大 200 条
+
+### 异常处理规范
+统一的异常处理机制：
+- BizException 业务异常
+- 错误码国际化配置
+- 敏感信息保护
+- 统一异常拦截
+
+---
+
 ## 💡 使用建议
 
 | 场景 | 推荐方式 |
@@ -266,10 +328,29 @@ indent_size = 2
 | Codex CLI 项目 | 项目根目录创建 `AGENTS.md` |
 | VS Code + Copilot | `.github/copilot-instructions.md` |
 | IDEA + Copilot | Live Template 快速注入 prompt |
+| Claude Code 项目 | 项目根目录创建 `CLAUDE.md` |
 
 ---
 
-## 🔄 更新规则
+## 🔄 更新日志
+
+### 2026-04-15
+- 🏗️ 重构目录结构：规范文档移至 `rules/`，`cursor/` 仅保留 Cursor 专用配置
+- 🆕 新增 `copilot/copilot-instructions.md`：GitHub Copilot 专用精简规范
+- 🆕 新增 `codex/AGENTS.md`：OpenAI Codex CLI 专用配置 + 工作流指令
+- 🆕 新增 `claude/CLAUDE.md`：Claude Code 专用配置 + 项目结构说明
+
+### 2026-02-12
+- ✨ 重构 JAVA_CODE_GUIDE.md，优化章节结构
+- ✨ 新增接口层面规范（Controller、URL、参数验证、RO/VO）
+- ✨ 新增分页规范（分页参数、常量定义、场景使用）
+- ✨ 新增异常处理规范（BizException、错误码、统一处理）
+- ✨ 新增 Dubbo 接口规范
+- ✨ 新增 Controller 日志规范
+
+---
+
+## ♻️ 更新规则
 
 ### 使用 Submodule 时
 
