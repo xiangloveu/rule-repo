@@ -14,7 +14,7 @@ R-DB-02 库名 / 字段名
 - 必须全小写
 - 必须使用下划线分隔
 - 示例：
-- pupu_main
+- company_main
   buyer_id
 
 ---

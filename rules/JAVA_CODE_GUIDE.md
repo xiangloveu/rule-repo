@@ -758,7 +758,7 @@ public PageResponse<Long> queryUserId(
 使用 `BizException` 抛出业务异常：
 
 ```java
-import com.pphr.util.exception.BizException;
+import com.company.common.exception.BizException;
 
 // 1. 简单错误码
 if (CollectionUtils.isEmpty(userBatchRO.getNums())) {
@@ -1010,13 +1010,13 @@ public class UserService {
 
 - 方法签名：`BasePageImpl<DTO类型> page(查询DTO queryDTO, Pageable pageable)`
 - 查询 DTO：包含业务查询条件，实现 Serializable
-- 返回类型：`BasePageImpl<T>`（来自 pupu-plus-starter-constants 包）
+- 返回类型：`BasePageImpl<T>`（来自项目公共包）
 - 分页参数：使用 `org.springframework.data.domain.Pageable`
 
 **接口定义示例：**
 
 ```java
-import com.pphr.constants.dto.BasePageImpl;
+import com.company.common.dto.BasePageImpl;
 import org.springframework.data.domain.Pageable;
 
 public interface ITenantApi {
@@ -1069,7 +1069,7 @@ public class TenantQueryDTO implements Serializable {
 
 **返回结果类型：**
 
-- 来自 `com.pphr.constants.dto.BasePageImpl`（项目依赖：pupu-plus-starter-constants）
+- 来自 `com.company.common.dto.BasePageImpl`（项目公共依赖包）
 - 分页参数使用 Spring Data 的 `org.springframework.data.domain.Pageable`
 
 ### 方法长度
