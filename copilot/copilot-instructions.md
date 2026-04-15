@@ -45,15 +45,12 @@
 ```java
 @Slf4j
 @Validated
-@ApiCode(value = ApiCodeConstants.User.code)
 @Api(tags = "用户接口")
 @RestController
-@RequestMapping("/open/basic/" + VERSION)
+@RequestMapping("/api/" + VERSION)
 public class UserController {
 
     @ApiOperation("获取用户信息")
-    @ApiCode(value = ApiCodeConstants.User.getUser,
-             authMode = {ApiAuthEnum.SERVER, ApiAuthEnum.USER_TOB})
     @GetMapping("/users/nums/{num}")
     public JsonResponse<UserVO> getUser(@PathVariable("num") String userNum) {
         return JsonResponse.getInstance(userService.get(userNum));

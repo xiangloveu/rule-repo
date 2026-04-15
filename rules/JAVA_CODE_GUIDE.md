@@ -444,10 +444,9 @@ Controller 类必须包含以下注解：
 ```java
 @Slf4j                                          // 日志
 @Validated                                      // 启用参数验证
-@ApiCode(value = ApiCodeConstants.User.code)    // API 编码注解
 @Api(tags = "人员接口")                          // Swagger 文档标签
 @RestController                                  // RESTful 控制器
-@RequestMapping("/open/basic/" + VERSION)        // 路径使用常量 VERSION (v1)
+@RequestMapping("/api/" + VERSION)               // 路径使用常量 VERSION (v1)
 public class UserController {
 
     @Autowired
@@ -468,20 +467,12 @@ public class UserController {
     @ApiImplicitParam(name = "is_enabled", value = "是否在职", required = false),
     @ApiImplicitParam(name = "ext_columns", value = "扩展字段", required = false)
 })
-@ApiCode(value = ApiCodeConstants.User.getUser,
-         authMode = {ApiAuthEnum.SERVER, ApiAuthEnum.USER_TOB})
 @GetMapping("/users/nums/{num}")
-@EncryptDecrypt
 public JsonResponse<UserVO> getUser(
     @PathVariable("num") String userNum,
     @RequestParam(value = "is_enabled", required = false) Boolean isEnabled,
     @RequestParam(value = "is_deleted", required = false) Boolean isDeleted,
     @RequestParam(value = "ext_columns", required = false) List<String> extColumns) {
-
-    // 设置字段权限
-    FieldsContext.setFields(
-        FieldPermissionCache.getAvailableFieldList(DataTypeEnum.USER, UserVO.class, extColumns)
-    );
 
     UserVO userVo = userService.get(userNum, isEnabled, isDeleted);
     return JsonResponse.getInstance(userVo);
@@ -574,42 +565,32 @@ public class UserQueryRO extends UserQueryBaseRO implements Serializable {
 
 ### VO (View Object) 规范
 
-返回对象需要使用字段权限过滤：
+返回对象可根据需要进行字段过滤：
 
 ```java
-// 设置允许返回的字段
-FieldsContext.setFields(
-    FieldPermissionCache.getAvailableFieldList(
-        DataTypeEnum.USER, UserVO.class, extColumns
-    )
-);
-
 // 执行业务逻辑
 UserVO userVo = userService.get(userNum, isEnabled, isDeleted);
 
-// 返回结果（自动过滤字段）
+// 返回结果
 return JsonResponse.getInstance(userVo);
 ```
 
 ### 认证鉴权规范
 
-使用 `@ApiCode` 注解配置认证模式：
+接口需根据访问场景配置合适的认证拦截，建议通过统一的认证拦截器或注解标注访问权限：
 
 ```java
-// 1. 仅服务端访问
-@ApiCode(value = ApiCodeConstants.User.getUser,
-         authMode = {ApiAuthEnum.SERVER})
+// 1. 仅服务端访问（内部服务间调用）
+@GetMapping("/users/nums/{num}")
+// 通过拦截器/网关配置服务端鉴权
 
-// 2. 服务端 + ToB用户访问
-@ApiCode(value = ApiCodeConstants.User.getUser,
-         authMode = {ApiAuthEnum.SERVER, ApiAuthEnum.USER_TOB})
+// 2. 服务端 + 用户访问（对内门户）
+@GetMapping("/users/nums/{num}")
+// 通过拦截器/网关配置用户鉴权
 
-// 3. 服务端 + ToB用户 + ToC用户访问
-@ApiCode(value = ApiCodeConstants.Config.getFrontConfig,
-         authMode = {ApiAuthEnum.SERVER, ApiAuthEnum.USER_TOB, ApiAuthEnum.USER_TOC})
-
-// 4. 允许匿名访问
-@ApiCode(allowAnonymous = true)
+// 3. 允许匿名访问
+@GetMapping("/public/config")
+// 通过拦截器/网关放通匿名访问
 ```
 
 ### 数据安全规范
@@ -618,21 +599,19 @@ return JsonResponse.getInstance(userVo);
 
 ```java
 @PostMapping("/users/identity_info/query")
-@EncryptDecrypt  // 加解密注解
-@ApiCode(value = ApiCodeConstants.User.getByIdentity, authMode = {ApiAuthEnum.SERVER})
 public JsonResponse<UserPassageVO> getByIdentity(
     @RequestBody @Validated UserIdentityQueryRO userIdentityQueryRO) {
 
     return JsonResponse.getInstance(
-        userService.getByIdentity(userIdentityQueryRO.getIdentityNum(), cacheEnable)
+        userService.getByIdentity(userIdentityQueryRO.getIdentityNum())
     );
 }
 ```
 
 **关键点：**
 
-- 敏感数据接口使用 `@EncryptDecrypt` 注解
-- 字段权限控制使用 `FieldPermissionCache`
+- 敏感数据（身份证、手机号等）接口需加密传输，可通过请求/响应过滤器实现
+- 字段权限控制根据调用方身份动态过滤返回字段
 - 身份证等敏感信息需加密传输
 
 ---
@@ -692,12 +671,6 @@ public PageResponse<UserVO> searchUser(
     if (CollectionUtil.isAllFieldEmpty(userSearchRO)) {
         return PageResponse.getInstance(0, "query param is empty");
     }
-
-    // 设置字段权限
-    List<String> pullFieldList = FieldPermissionCache.getAvailableFieldList(
-        DataTypeEnum.USER, UserVO.class, userSearchRO.getExtColumns()
-    );
-    FieldsContext.setFields(pullFieldList);
 
     // 执行查询
     BasePageImpl<UserVO> userSearchVOS = userService.searchUser(userSearchRO, pageable);
@@ -1437,9 +1410,8 @@ public class UserController {
         Pageable pageable) {
 
         // 记录管理员请求日志
-        if (UserContextSupport.getCurrentUser(true)
-                .getAudienceClaim().equals(JwtAudienceClaim.ADMIN)) {
-            log.info("POST /open/basic/v1/users/query, param={}",
+        if (isAdminRequest()) {
+            log.info("POST /api/v1/users/query, param={}",
                      JSONObject.toJSONString(userQueryRO));
         }
 

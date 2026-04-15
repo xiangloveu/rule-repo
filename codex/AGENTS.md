@@ -63,7 +63,7 @@
 @Validated
 @Api(tags = "模块名称")
 @RestController
-@RequestMapping("/open/basic/v1")
+@RequestMapping("/api/v1")
 public class XxxController {
 
     @Autowired

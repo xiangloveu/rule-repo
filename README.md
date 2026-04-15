@@ -298,7 +298,7 @@ ln -s .rules/claude/CLAUDE.md CLAUDE.md
 ## 📊 规范亮点
 
 ### 接口层面规范
-从实际项目 `open-basic` 模块提取的最佳实践：
+从实际项目提取的最佳实践：
 - 完整的 Controller 注解配置
 - RESTful URL 设计规范（下划线命名）
 - 参数验证和业务校验结合
