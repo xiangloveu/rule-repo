@@ -27,6 +27,34 @@
 
 ## 任务执行工作流
 
+### Dubbo 接口参数变更规范
+
+**修改 Dubbo 对外接口参数前，必须暂停操作，告知用户影响，等待确认后再执行。**
+
+**高风险变更（必须用户确认）：**
+- 泛型参数类型替换：`List<Long>` → `List<String>`
+- 基础类型替换：`Long` → `String`、`Integer` → `Long`
+- 删除已有参数 / 修改返回值类型
+
+**如何判断是否为 Dubbo 对外接口：**
+- 接口位于 `facade` / `api` 模块，或包路径含 `facade`、`api`、`provider`
+- 接口或实现类有 `@DubboService` 注解
+
+**安全变更（可直接修改）：**
+- `@RestController` HTTP 接口（JSON 序列化，容错性强）
+- Service / Manager / Mapper 等本服务内部类
+
+**推荐兼容方案：**
+```java
+// 保留旧方法 + 新增方法，或升级 Dubbo 版本号
+@Deprecated
+List<Long> getUserIds();
+
+List<String> getUserStringIds(); // 新增
+```
+
+---
+
 ### 编写代码前
 
 1. **先读文件**：修改已有文件前，必须先完整阅读该文件

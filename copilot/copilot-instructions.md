@@ -176,6 +176,51 @@ fix(order): 修复订单金额精度问题
 
 ---
 
+## Dubbo 接口参数变更规范
+
+**Dubbo 对外接口参数类型修改属于破坏性变更，会导致下游服务编译报错，必须谨慎处理。**
+
+### 高风险变更 - 检测到时必须暂停并告知用户
+
+| 变更类型 | 示例 | 影响 |
+|---------|------|------|
+| 泛型参数替换 | `List<Long>` → `List<String>` | 下游编译报错 |
+| 基础类型替换 | `Long` → `String` | 下游编译报错 |
+| 删除参数 | 移除已有参数 | 下游编译报错 |
+| 返回值类型修改 | `UserDTO` → `UserVO` | 下游编译报错 |
+
+**处理原则：** 检测到以上变更时，停止代码生成，向用户说明影响范围（下游 Dubbo 调用方需同步升级），等待用户明确确认后再执行。
+
+### 判断是否为 Dubbo 对外接口
+
+- 接口位于 `facade` / `api` 模块
+- 接口实现类有 `@DubboService` 注解
+- 包路径含 `facade`、`api`、`provider`
+
+### 安全变更（可直接修改，不影响外部）
+
+- `@RestController` HTTP 接口
+- Service / Manager / Mapper 等本服务内部实现
+
+### 兼容性方案
+
+```java
+// ❌ 直接修改类型 - 禁止（下游编译报错）
+List<Long> getUserIds();  // 不可直接改为 List<String>
+
+// ✅ 方案1：新增方法 + 废弃旧方法
+@Deprecated
+List<Long> getUserIds();        // 保留，加废弃标记
+
+List<String> getUserStringIds(); // 新增兼容方法
+
+// ✅ 方案2：升级接口版本
+@DubboService(version = "2.0.0")
+public class UserServiceImpl implements UserService { }
+```
+
+---
+
 ## 代码审查清单
 
 生成或修改代码时，自动检查：

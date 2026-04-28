@@ -211,6 +211,48 @@ Fixes #456
 4. **关联 issue**: 在 footer 中关联相关的 issue 编号
 5. **频繁提交**: 功能开发完成一个小模块就提交，避免一次提交大量代码
 
+## Dubbo 接口参数变更规范
+
+**Dubbo 对外接口参数类型变更属于破坏性变更，修改前必须暂停并告知用户。**
+
+### 高风险变更 - 必须用户确认
+
+检测到以下情况时，停止修改，向用户说明影响并等待确认：
+
+- 泛型参数类型替换：`List<Long>` → `List<String>`
+- 基础类型替换：`Long` → `String`、`Integer` → `Long`
+- 删除已有参数
+- 修改方法返回值类型
+
+**判断是否为 Dubbo 对外接口：**
+- 接口位于 `facade` / `api` 模块
+- 接口或实现类有 `@DubboService` 注解
+- 包路径含 `facade`、`api`、`provider`
+
+### 安全变更（可直接修改）
+
+- `@RestController` HTTP 接口
+- Service / Manager / Mapper 等内部实现类
+- 仅项目内部使用的 Service 接口
+
+### 推荐兼容性方案
+
+```java
+// ❌ 禁止直接替换类型
+List<Long> getUserIds();  // 改为 List<String> 会导致下游编译报错
+
+// ✅ 新增方法 + 废弃旧方法
+@Deprecated
+List<Long> getUserIds();       // 保留旧接口，加废弃标记
+
+List<String> getUserStringIds(); // 新增兼容方法
+
+// ✅ 或升级接口版本号
+@DubboService(version = "2.0.0")
+```
+
+---
+
 ## 代码审查要点
 
 在生成或修改代码时，自动检查以下方面：
